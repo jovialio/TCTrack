@@ -21,8 +21,8 @@ torch.set_num_threads(1)
 
 parser = argparse.ArgumentParser(description='TCTrack demo')
 parser.add_argument('--config', type=str, default='../experiments/config.yaml', help='config file')
-parser.add_argument('--snapshot', type=str, default='./snapshot/tctrack.pth', help='model name')
-parser.add_argument('--video_name', default='../test_dataset/sequence_name', type=str, help='videos or image files')
+parser.add_argument('--snapshot', type=str, default='./snapshot/checkpoint00_e84.pth', help='model name')
+parser.add_argument('--video_name', default='/data/vlc-record-2022-05-23-14h21m42s-h264-.mp4', type=str, help='videos or image files')
 args = parser.parse_args()
 
 
@@ -91,7 +91,11 @@ def main():
                           (bbox[0]+bbox[2], bbox[1]+bbox[3]),
                           (0, 255, 0), 3)
             cv2.imshow(video_name, frame)
-            cv2.waitKey(40)
+            key = cv2.waitKey(40)
+            if key == ord('q'):
+                break
+            elif key == ord('r'):
+                first_frame = True
 
 
 if __name__ == '__main__':
