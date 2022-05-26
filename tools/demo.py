@@ -16,13 +16,14 @@ from pysot.core.config import cfg
 from pysot.models.utile.model_builder import ModelBuilder
 from pysot.tracker.tctrack_tracker import TCTrackTracker
 from pysot.utils.model_load import load_pretrain
+import time
 
 torch.set_num_threads(1)
 
 parser = argparse.ArgumentParser(description='TCTrack demo')
 parser.add_argument('--config', type=str, default='../experiments/config.yaml', help='config file')
 parser.add_argument('--snapshot', type=str, default='./snapshot/checkpoint00_e84.pth', help='model name')
-parser.add_argument('--video_name', default='/data/vlc-record-2022-05-23-14h21m42s-h264-.mp4', type=str, help='videos or image files')
+parser.add_argument('--video_name', default='/data/mha/vlc-record-2022-05-23-14h29m30s-h264-.mp4', type=str, help='videos or image files')
 args = parser.parse_args()
 
 
@@ -77,6 +78,7 @@ def main():
         video_name = 'webcam'
     cv2.namedWindow(video_name, cv2.WND_PROP_FULLSCREEN)
     for frame in get_frames(args.video_name):
+        start_time = time.time()
         if first_frame:
             try:
                 init_rect = cv2.selectROI(video_name, frame, False, False)
@@ -86,12 +88,18 @@ def main():
             first_frame = False
         else:
             outputs = tracker.track(frame)
+
+            fps = 1 / (time.time() - start_time)
+            fps = str(int(fps))
+            cv2.putText(frame, fps, (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
+            cv2.putText(frame, str(outputs['best_score']), (7, 150), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
+
             bbox = list(map(int, outputs['bbox']))
             cv2.rectangle(frame, (bbox[0], bbox[1]),
                           (bbox[0]+bbox[2], bbox[1]+bbox[3]),
                           (0, 255, 0), 3)
             cv2.imshow(video_name, frame)
-            key = cv2.waitKey(40)
+            key = cv2.waitKey(1)
             if key == ord('q'):
                 break
             elif key == ord('r'):
