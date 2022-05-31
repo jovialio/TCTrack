@@ -7,5 +7,7 @@ colorama
 matplotlib
 cython
 tensorboardX
+got10k
+Pillow
 
 
